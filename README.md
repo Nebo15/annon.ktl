@@ -17,7 +17,7 @@ Cluster configuration commands:
   get            Display one or many resources (supports: requests, request, api).
   delete         Delete resources (supports: request, api).
 
-Informational commands commands:
+Informational commands:
 
   help           Help about any command.
   version        Prints annonktl and gateway versions.
