@@ -42,17 +42,17 @@ Environment variables:
 
   1. This CLI tools is distributed in an escript format on Hex.pm:
 
-  ```bash
-  mix escript.install hex annon_ktl
-  ```
+    ```bash
+    mix escript.install hex annon_ktl
+    ```
 
   2. After installation, the escript can be invoked as
 
-      ~/.mix/escripts/annon_ktl
+      `~/.mix/escripts/annon_ktl`
 
-  For convenience, consider adding ~/.mix/escripts directory to your PATH
+  For convenience, consider adding `~/.mix/escripts` directory to your PATH
   environment variable. For more information, check the wikipedia article on
-  PATH: https://en.wikipedia.org/wiki/PATH_(variable)
+  PATH: [https://en.wikipedia.org/wiki/PATH_(variable)](https://en.wikipedia.org/wiki/PATH_(variable)).
 
 ## License
 
