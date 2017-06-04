@@ -50,9 +50,13 @@ Environment variables:
 
       `~/.mix/escripts/annon_ktl`
 
-  For convenience, consider adding `~/.mix/escripts` directory to your PATH
-  environment variable. For more information, check the wikipedia article on
-  PATH: [https://en.wikipedia.org/wiki/PATH_(variable)](https://en.wikipedia.org/wiki/PATH_(variable)).
+    For convenience, consider adding `~/.mix/escripts` directory to your PATH
+    environment variable. For more information, check the wikipedia article on
+    PATH: [https://en.wikipedia.org/wiki/PATH_(variable)](https://en.wikipedia.org/wiki/PATH_(variable)).
+
+  3. Add your first environment
+
+    `annonktl config context add my_context http://example.com:8080/`
 
 ## License
 
