@@ -42,21 +42,19 @@ Environment variables:
 
   1. This CLI tools is distributed in an escript format on Hex.pm:
 
-    ```bash
     mix escript.install hex annon_ktl
-    ```
 
   2. After installation, the escript can be invoked as
 
-      `~/.mix/escripts/annon_ktl`
+    ~/.mix/escripts/annon_ktl
 
-    For convenience, consider adding `~/.mix/escripts` directory to your PATH
-    environment variable. For more information, check the wikipedia article on
-    PATH: [https://en.wikipedia.org/wiki/PATH_(variable)](https://en.wikipedia.org/wiki/PATH_(variable)).
+  For convenience, consider adding `~/.mix/escripts` directory to your PATH
+  environment variable. For more information, check the wikipedia article on
+  PATH: [https://en.wikipedia.org/wiki/PATH_(variable)](https://en.wikipedia.org/wiki/PATH_(variable)).
 
   3. Add your first environment
 
-    `annonktl config context add my_context http://example.com:8080/`
+    annonktl config context add my_context http://example.com:8080/
 
 ## License
 
