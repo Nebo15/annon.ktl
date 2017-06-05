@@ -13,6 +13,7 @@ defmodule Annon.Controller do
     apply          Create or update one of resources.
     get            Display one or many resources (supports: requests, request, api).
     delete         Delete resources (supports: request, api).
+    pull           Experimental. Pull remote configuration and store in YAML file.
 
   Informational commands:
 
@@ -36,7 +37,7 @@ defmodule Annon.Controller do
   """
   alias Mix.Project
   alias Annon.Controller.Context
-  alias Annon.Controller.Subcommands.{Status, Routes, Config, Requests, Request, API, Taint, Apply, Delete}
+  alias Annon.Controller.Subcommands.{Status, Routes, Config, Requests, Request, API, Taint, Apply, Delete, Pull}
 
   @version Project.config[:version]
 
@@ -105,6 +106,15 @@ defmodule Annon.Controller do
       |> enshure_management_endpoint()
 
     Apply.run_subcommand(tail, global_opts, subcommand_args)
+  end
+
+  defp run_command(["pull" | tail], global_opts, subcommand_args) do
+    global_opts =
+      global_opts
+      |> apply_context_opts()
+      |> enshure_management_endpoint()
+
+    Pull.run_subcommand(tail, global_opts, subcommand_args)
   end
 
   defp run_command(["get", "help"], _global_opts, _subcommand_args) do

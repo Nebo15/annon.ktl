@@ -29,7 +29,9 @@ defmodule Annon.Controller.Mixfile do
   end
 
   def application do
-    [extra_applications: [:logger, :mix, :poison, :httpoison, :yaml_elixir, :yamerl, :progress_bar, :table]]
+    [extra_applications: [:logger, :mix, :poison, :httpoison,
+                          :yaml_elixir, :yamerl, :yaml_encoder,
+                          :progress_bar, :table]]
   end
 
   # Specifies which paths to compile per environment.
@@ -54,8 +56,9 @@ defmodule Annon.Controller.Mixfile do
      {:httpoison, "~> 0.11.2"},
      {:yaml_elixir, "~> 1.3"},
      {:yamerl, "~> 0.3.2"},
-     {:progress_bar, "> 0.0.0"}, # https://github.com/henrik/progress_bar
-     {:table, "~> 0.0.5"}, # Table.table(%{"key"=> "value"})
+     {:yaml_encoder, "~> 0.0.2"},
+     {:progress_bar, "> 0.0.0"},
+     {:table, "~> 0.0.5"},
      {:ex_doc, ">= 0.15.0", only: [:dev, :test]},
      {:excoveralls, ">= 0.5.0", only: [:dev, :test]},
      {:dogma, ">= 0.1.12", only: [:dev, :test]},

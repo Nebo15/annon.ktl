@@ -20,12 +20,15 @@ defmodule Annon.Client.API do
 
   def list_apis(opts) do
     management_endpoint = Keyword.fetch!(opts, :management_endpoint)
+    structs? = Keyword.get(opts, :structs?, true)
     query = maybe_filter_by_name(%{limit: 1000}, Keyword.get(opts, :name))
     request_params = "?" <> URI.encode_query(query)
     reqest_uri = "#{management_endpoint}/apis#{request_params}"
 
+    opts = if structs?, do: [as: %{"data" => [%API{plugins: [%Plugin{}]}]}], else: []
+
     with {:ok, %Response{body: encoded_body, status_code: 200}} <- get(reqest_uri),
-         {:ok, %{"data" => apis}} <- Poison.decode(encoded_body, as: %{"data" => [%API{plugins: [%Plugin{}]}]}) do
+         {:ok, %{"data" => apis}} <- Poison.decode(encoded_body, opts) do
       apis
     else
       {:ok, %Response{status_code: status_code}} ->

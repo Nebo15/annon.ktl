@@ -14,10 +14,13 @@ defmodule Annon.Client.Plugin do
 
   def list_plugins(%API{id: api_id}, opts) do
     management_endpoint = Keyword.fetch!(opts, :management_endpoint)
+    structs? = Keyword.get(opts, :structs?, true)
     reqest_uri = "#{management_endpoint}/apis/#{api_id}/plugins"
 
+    opts = if structs?, do: [as: %{"data" => [%Plugin{}]}], else: []
+
     with {:ok, %Response{body: encoded_body, status_code: 200}} <- get(reqest_uri),
-         {:ok, %{"data" => plugins}} <- Poison.decode(encoded_body, as: %{"data" => [%Plugin{}]}) do
+         {:ok, %{"data" => plugins}} <- Poison.decode(encoded_body, opts) do
       plugins
     else
       {:ok, %Response{status_code: status_code}} ->
