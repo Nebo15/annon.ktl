@@ -68,7 +68,6 @@ defmodule Annon.Controller.Context do
       config
       |> drop_context(name)
       |> Kernel.++([context])
-      |> IO.inspect
 
     config
     |> Map.put("contexts", contexts)

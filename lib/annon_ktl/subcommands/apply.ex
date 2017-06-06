@@ -46,9 +46,13 @@ defmodule Annon.Controller.Subcommands.Apply do
     IO.puts "Configuration will be read from #{path}"
 
     files =
-      if Keyword.get(opts, :recursive, false),
-        do: ls_r!(path),
-      else: ls!(path)
+      if File.regular?(path) do
+        [path]
+      else
+        if Keyword.get(opts, :recursive, false),
+          do: ls_r!(path),
+        else: ls!(path)
+      end
     files = Enum.filter(files, fn path -> Path.extname(path) == ".yaml" end)
     IO.puts "Found #{length(files)} configuration files."
 
