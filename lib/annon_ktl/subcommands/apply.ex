@@ -69,29 +69,29 @@ defmodule Annon.Controller.Subcommands.Apply do
       end)
     IO.puts "Found #{length(apis)} API definitions."
 
-    remote_apis = API.list_apis(global_opts)
-    remote_api_ids = Enum.map(remote_apis, &Map.get(&1, :id))
+    remote_apis =
+      global_opts
+      |> API.list_apis()
+      |> load_plugins(global_opts)
     IO.puts "There are #{length(remote_apis)} APIs on remote host."
 
-    {statements, dirty_apis} =
-      Enum.reduce(apis, {[], remote_apis}, fn
-        %{id: api_id} = api, {statements, remote_apis} ->
-          if api_id in remote_api_ids,
-            do: {statements ++ [{:update, api}], Enum.reject(remote_apis, &(&1.id == api_id))},
-          else: {statements ++ [{:create, api}], remote_apis}
-      end)
-
-    statements = if clean?, do: Enum.reduce(dirty_apis, statements, &(&2 ++ [{:delete, &1}])), else: statements
+    statements = build_apis_statements(apis, remote_apis, clean?)
 
     if Keyword.get(opts, :dry, false) do
       IO.puts IO.ANSI.yellow() <> "Running in dry mode" <> IO.ANSI.reset
       Enum.map(statements, fn
         {:create, api} ->
-          IO.puts "- API #{api.name} (#{api.id}) will be #{IO.ANSI.green()}created.#{IO.ANSI.reset()}"
+          IO.puts "- #{IO.ANSI.green()}Create#{IO.ANSI.reset()} API #{api.name} (#{api.id})."
         {:update, api} ->
-          IO.puts "- API #{api.name} (#{api.id}) will be #{IO.ANSI.yellow()}updated.#{IO.ANSI.reset()}"
+          IO.puts "- #{IO.ANSI.yellow()}Update#{IO.ANSI.reset()} API #{api.name} (#{api.id})."
         {:delete, api} ->
-          IO.puts "- API #{api.name} (#{api.id}) will be #{IO.ANSI.red()}deleted.#{IO.ANSI.reset()}"
+          IO.puts "- #{IO.ANSI.red()}Delete#{IO.ANSI.reset()} API #{api.name} (#{api.id})."
+        {:create_plugin, api, plugin} ->
+          IO.puts "  > #{IO.ANSI.green()}Create#{IO.ANSI.reset()} Plugin #{plugin.name} for API #{api.name} (#{api.id})."
+        {:update_plugin, api, plugin} ->
+          IO.puts "  > #{IO.ANSI.yellow()}Update#{IO.ANSI.reset()} Plugin #{plugin.name} in API #{api.name} (#{api.id})."
+        {:delete_plugin, api, plugin} ->
+          IO.puts "  > #{IO.ANSI.red()}Delete#{IO.ANSI.reset()} Plugin #{plugin.name} in API #{api.name} (#{api.id})."
       end)
     else
       IO.puts IO.ANSI.yellow() <> "Performing changes" <> IO.ANSI.reset
@@ -103,6 +103,56 @@ defmodule Annon.Controller.Subcommands.Apply do
 
   def run_subcommand(argv, _global_opts, _subcommand_args),
     do: Annon.Controller.puts_missing_command_error("get requests", argv)
+
+  defp load_plugins(apis, global_opts) do
+    progress_opts = [
+      text: "Fetching Plugins…",
+      done: [IO.ANSI.green, "✓", IO.ANSI.reset, " Plugins fetched."]
+    ]
+
+    ProgressBar.render_spinner(progress_opts, fn ->
+      apis
+      |> Enum.map(&Task.async(__MODULE__, :do_load_plugins, [&1, global_opts]))
+      |> Enum.map(&Task.await/1)
+    end)
+  end
+
+  def do_load_plugins(api, global_opts) do
+    %{api | plugins: Plugin.list_plugins(api, global_opts)}
+  end
+
+  defp build_apis_statements(apis, remote_apis, clean?) do
+    remote_api_ids = Enum.map(remote_apis, &Map.get(&1, :id))
+    {statements, dirty_apis} =
+      Enum.reduce(apis, {[], remote_apis}, fn
+        %{id: api_id} = api, {statements, remote_apis} ->
+          remote_api = Enum.find(remote_apis, &(&1.id == api_id))
+          plugin_statements = build_plugins_statements(api, api.plugins, remote_api.plugins, clean?)
+
+          if api_id in remote_api_ids,
+            do: {statements ++ [{:update, api}] ++ plugin_statements, Enum.reject(remote_apis, &(&1.id == api_id))},
+          else: {statements ++ [{:create, api}] ++ plugin_statements, remote_apis}
+      end)
+
+    if clean?,
+      do: Enum.reduce(dirty_apis, statements, &(&2 ++ [{:delete, &1}])),
+    else: statements
+  end
+
+  defp build_plugins_statements(api, plugins, remote_plugins, clean?) do
+    remote_pugin_names = Enum.map(remote_plugins, &Map.get(&1, :name))
+    {statements, dirty_plugins} =
+      Enum.reduce(plugins, {[], remote_plugins}, fn
+        %{name: plugin_name} = plugin, {statements, remote_plugins} ->
+          if plugin_name in remote_pugin_names,
+            do: {statements ++ [{:update_plugin, api, plugin}], Enum.reject(remote_plugins, &(&1.name == plugin_name))},
+          else: {statements ++ [{:create_plugin, api, plugin}], remote_plugins}
+      end)
+
+    if clean?,
+      do: Enum.reduce(dirty_plugins, statements, &(&2 ++ [{:delete_plugin, api, &1}])),
+    else: statements
+  end
 
   defp ls!(path) do
     path
@@ -136,14 +186,22 @@ defmodule Annon.Controller.Subcommands.Apply do
 
   def execute_statement({:create, api}, global_opts) do
     {:ok, {:created, _api}} = API.apply_api(api, global_opts)
-    IO.puts "- Created API #{api.name} (#{api.id})"
+    IO.puts "- Created API #{api.name} (#{api.id}) and it's plugins"
   end
   def execute_statement({:update, api}, global_opts) do
     {:ok, {:updated, _api}} = API.apply_api(api, global_opts)
-    IO.puts "- Updated API #{api.name} (#{api.id})"
+    IO.puts "- Updated API #{api.name} (#{api.id}) and it's plugins"
   end
   def execute_statement({:delete, api}, global_opts) do
     :ok = API.delete_api(api, global_opts)
-    IO.puts "- Deleting API #{api.name} (#{api.id})"
+    IO.puts "- Deleted API #{api.name} (#{api.id})"
   end
+  def execute_statement({:delete_plugin, api, plugin}, global_opts) do
+    :ok = Plugin.delete_plugin(api, plugin.name, global_opts)
+    IO.puts "- Deleted Plugin #{plugin.name} for API #{api.name} (#{api.id})"
+  end
+  def execute_statement({:update_plugin, _api, _plugin}, _global_opts),
+    do: :noop
+  def execute_statement({:create_plugin, _api, _plugin}, _global_opts),
+    do: :noop
 end
