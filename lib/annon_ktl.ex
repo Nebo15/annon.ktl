@@ -23,8 +23,8 @@ defmodule Annon.Controller do
 
   List of global options:
 
-    --management-endpoint=http://example.com/ - URL to Annon API Gateway management endpoint.
     --context=my_context - The name of annonktl context to use.
+    --management-endpoint=http://example.com/ - URL to Annon API Gateway management endpoint.
     -h, --help - Display help for annonktl command.
 
   Environment variables:
@@ -52,6 +52,9 @@ defmodule Annon.Controller do
     h: :help,
     o: :output,
   ]
+
+  @context_env_name "ANNONKTL_CONTEXT"
+  @management_endpoint_env_name "ANNONKTL_MANAGEMENT_ENDPOINT"
 
   def main(args \\ []) do
     {global_opts, argv, errors} = OptionParser.parse(args, switches: @global_switches, aliases: @global_aliases)
@@ -194,8 +197,7 @@ defmodule Annon.Controller do
 
   # This function allows errors to be parsed with OptionParser again
   defp build_subcommand_args(errors) do
-    errors
-    |> Enum.reduce([], fn
+    Enum.reduce(errors, [], fn
       {key, nil}, args ->
         args ++ [key]
       {key, value}, args ->
@@ -204,15 +206,31 @@ defmodule Annon.Controller do
   end
 
   defp apply_context_opts(global_opts) do
-    case Context.get_current_context() do
-      {:ok, %{"name" => current_context, "management_endpoint" => current_management_endpoint}} ->
-        global_opts
-        |> Keyword.put_new(:context, current_context)
-        |> Keyword.put_new(:management_endpoint, current_management_endpoint)
-      _ ->
-        global_opts
-        |> Keyword.put_new(:context, System.get_env("ANNONKTL_CONTEXT"))
-        |> Keyword.put_new(:management_endpoint, System.get_env("ANNONKTL_MANAGEMENT_ENDPOINT"))
+    context_name = resolve_context_name(global_opts)
+
+    management_endpoint =
+      Keyword.get(global_opts, :management_endpoint, System.get_env(@management_endpoint_env_name))
+
+    management_endpoint =
+      unless is_nil(management_endpoint) do
+        management_endpoint
+      else
+        case Context.fetch_context(context_name) do
+          {:ok, %{"management_endpoint" => management_endpoint}} -> management_endpoint
+          :error -> raise "Context #{context_name} does not exist."
+        end
+      end
+
+    global_opts
+    |> Keyword.put_new(:context, context_name)
+    |> Keyword.put_new(:management_endpoint, management_endpoint)
+  end
+
+  defp resolve_context_name(global_opts) do
+    context_name = Keyword.get(global_opts, :context, System.get_env(@context_env_name))
+    cond do
+      context_name -> context_name
+      {:ok, %{"name" => current_context_name}} = Context.get_current_context() -> current_context_name
     end
   end
 
