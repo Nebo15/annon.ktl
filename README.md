@@ -54,7 +54,7 @@ Environment variables:
 
   3. Add your first environment
 
-    annonktl config context add my_context http://example.com:8080/
+    annonktl config context apply my_context http://example.com:8080/
 
 ## License
 
