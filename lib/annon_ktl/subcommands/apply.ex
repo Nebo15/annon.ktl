@@ -126,8 +126,12 @@ defmodule Annon.Controller.Subcommands.Apply do
     {statements, dirty_apis} =
       Enum.reduce(apis, {[], remote_apis}, fn
         %{id: api_id} = api, {statements, remote_apis} ->
-          remote_api = Enum.find(remote_apis, &(&1.id == api_id))
-          plugin_statements = build_plugins_statements(api, api.plugins, remote_api.plugins, clean?)
+          remote_api_plugins =
+            case Enum.find(remote_apis, &(&1.id == api_id)) do
+              nil -> []
+              remote_api -> remote_api.plugins
+            end
+          plugin_statements = build_plugins_statements(api, api.plugins, remote_api_plugins, clean?)
 
           if api_id in remote_api_ids,
             do: {statements ++ [{:update, api}] ++ plugin_statements, Enum.reject(remote_apis, &(&1.id == api_id))},
