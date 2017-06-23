@@ -62,6 +62,7 @@ defmodule Annon.Controller.Subcommands.Request do
     """
     ID: #{request.id}
     API ID: #{api_id}#{idempotency_key}
+    Timestamp: #{request.inserted_at}
     Consumer IP Address: #{request.ip_address}
 
     Latencies:

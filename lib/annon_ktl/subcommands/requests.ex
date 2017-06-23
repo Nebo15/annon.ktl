@@ -100,11 +100,12 @@ defmodule Annon.Controller.Subcommands.Requests do
       client_latency = request.latencies.client_request
 
       %{
-        "1. ID" => request.id,
-        "2. API ID" => api_id,
+        "1. Timestamp" => request.inserted_at,
+        "2. ID" => request.id,
+        "3. API ID" => api_id,
         "4. Status Code" => colorify_status_code(request.status_code),
         "5. Latency (μs)" => colorify_text(to_string(client_latency), client_latency < 500_000),
-        "5. Method and URI" => "#{request.request.method} #{request.request.uri}",
+        "6. Method and URI" => "#{request.request.method} #{request.request.uri}",
       }
     end)
     |> Table.table()

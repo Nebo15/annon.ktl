@@ -43,7 +43,8 @@ defmodule Annon.Client.Request do
             latencies: %LatenciesStruct{},
             idempotency_key: nil,
             ip_address: nil,
-            status_code: nil
+            status_code: nil,
+            inserted_at: nil
 
   def list_requests(opts) do
     management_endpoint = Keyword.fetch!(opts, :management_endpoint)
