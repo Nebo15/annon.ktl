@@ -1,12 +1,15 @@
 defmodule Annon.Controller.Subcommands.Pull do
   @moduledoc """
-  Pull remote gateway configuration and stores in a YAML file locally.
+  Pull remote gateway configuration in a YAML format.
   This feature is experimental.
 
   List of subcommands:
 
     help                   Prints help about requests command.
 
+  Examples:
+
+    annonktl pull |> my_routes.yaml - Pull configuration and store in a yaml file.
 
   To see list of global options use "annonktl help".
   """
@@ -17,26 +20,18 @@ defmodule Annon.Controller.Subcommands.Pull do
     IO.puts @moduledoc
   end
 
-  def run_subcommand([path], global_opts, _subcommand_args) do
-    path = Path.expand(path)
-    File.mkdir_p(path)
-    path = if File.dir?(path), do: Path.join(path, "routes.yaml"), else: path
-    IO.puts "Configuration will be stored in #{path}."
-
+  def run_subcommand([], global_opts, _subcommand_args) do
     remote_apis =
       global_opts
       |> API.list_apis()
       |> load_plugins(global_opts)
-    IO.puts "There are #{length(remote_apis)} APIs on remote host."
 
-    yaml =
-      remote_apis
-      |> Poison.encode!() # TODO: Drop all structs in other way
-      |> Poison.decode!()
-      |> Enum.map(&YamlEncoder.encode/1)
-      |> Enum.join("\n---\n")
-
-    File.write(path, yaml)
+    remote_apis
+    |> Poison.encode!() # TODO: Drop all structs in other way
+    |> Poison.decode!()
+    |> Enum.map(&YamlEncoder.encode/1)
+    |> Enum.join("\n---\n")
+    |> IO.puts
   end
 
   def run_subcommand(argv, _global_opts, _subcommand_args),

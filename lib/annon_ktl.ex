@@ -13,7 +13,7 @@ defmodule Annon.Controller do
     apply          Create or update one of resources.
     get            Display one or many resources (supports: requests, request, api, apis).
     delete         Delete resources (supports: request, api).
-    pull           Experimental. Pull remote configuration and store in YAML file.
+    pull           Pull remote configuration in a YAML format.
 
   Informational commands:
 
@@ -111,13 +111,13 @@ defmodule Annon.Controller do
     Apply.run_subcommand(tail, global_opts, subcommand_args)
   end
 
-  defp run_command(["pull" | tail], global_opts, subcommand_args) do
+  defp run_command(["pull"], global_opts, subcommand_args) do
     global_opts =
       global_opts
       |> apply_context_opts()
       |> enshure_management_endpoint()
 
-    Pull.run_subcommand(tail, global_opts, subcommand_args)
+    Pull.run_subcommand([], global_opts, subcommand_args)
   end
 
   defp run_command(["get", "help"], _global_opts, _subcommand_args) do
