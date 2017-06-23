@@ -102,7 +102,7 @@ defmodule Annon.Controller.Subcommands.Apply do
   end
 
   def run_subcommand(argv, _global_opts, _subcommand_args),
-    do: Annon.Controller.puts_missing_command_error("get requests", argv)
+    do: Annon.Controller.puts_missing_command_error("apply", argv)
 
   defp load_plugins(apis, global_opts) do
     progress_opts = [
