@@ -1,6 +1,6 @@
-defmodule Annon.Controller.Subcommands.Routes do
+defmodule Annon.Controller.Subcommands.APIs do
   @moduledoc """
-  Prints all routes.
+  Prints all APIs and routes they lead to.
 
   List of subcommands:
 
@@ -16,7 +16,7 @@ defmodule Annon.Controller.Subcommands.Routes do
 
   Other options:
 
-    -p, --load_plugins - Load and display plugins in output.
+    -p, --load_plugins - Load and display plugins in output. Required to see API route.
     -o, --output=json|raw - Output in selected format.
 
     To see list of global options use "annonktl help".
@@ -71,7 +71,7 @@ defmodule Annon.Controller.Subcommands.Routes do
   end
 
   def run_subcommand(argv, _global_opts, _subcommand_args),
-    do: Annon.Controller.puts_missing_command_error("routes", argv)
+    do: Annon.Controller.puts_missing_command_error("get apis", argv)
 
   defp maybe_load_plugins(apis, false, _format, _global_opts),
     do: apis

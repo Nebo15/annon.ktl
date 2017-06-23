@@ -5,13 +5,13 @@ defmodule Annon.Controller do
   Discovery commands:
 
     status         Status of Annon API Gateway cluster.
-    routes         Prints all routes.
+    routes         Prints all routes. Shorthand for `get apis -p`.
 
   Cluster configuration commands:
 
     taint          Update API health status.
     apply          Create or update one of resources.
-    get            Display one or many resources (supports: requests, request, api).
+    get            Display one or many resources (supports: requests, request, api, apis).
     delete         Delete resources (supports: request, api).
     pull           Experimental. Pull remote configuration and store in YAML file.
 
@@ -37,7 +37,7 @@ defmodule Annon.Controller do
   """
   alias Mix.Project
   alias Annon.Controller.Context
-  alias Annon.Controller.Subcommands.{Status, Routes, Config, Requests, Request, API, Taint, Apply, Delete, Pull}
+  alias Annon.Controller.Subcommands.{Status, Config, Requests, Request, APIs, API, Taint, Apply, Delete, Pull}
 
   @version Project.config[:version]
 
@@ -90,7 +90,7 @@ defmodule Annon.Controller do
       |> apply_context_opts()
       |> enshure_management_endpoint()
 
-    Routes.run_subcommand(tail, global_opts, subcommand_args)
+    APIs.run_subcommand(tail, global_opts, subcommand_args ++ ["-p"])
   end
 
   defp run_command(["taint" | tail], global_opts, subcommand_args) do
@@ -134,6 +134,9 @@ defmodule Annon.Controller do
       |> enshure_management_endpoint()
 
     case resource do
+      "apis" ->
+        APIs.run_subcommand(tail, global_opts, subcommand_args)
+
       "api" ->
         API.run_subcommand(tail, global_opts, subcommand_args)
 
