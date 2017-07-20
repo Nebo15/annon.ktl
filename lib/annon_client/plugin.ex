@@ -70,6 +70,9 @@ defmodule Annon.Client.Plugin do
     case put(reqest_uri, %{plugin: plugin}) do
       {:ok, %Response{status_code: status_code}} when status_code in [200, 201] ->
         if status_code == 200, do: {:ok, {:updated, plugin}}, else: {:ok, {:created, plugin}}
+      {:ok, %Response{status_code: 422, body: body}} ->
+        throw "Configuration for Plugin #{to_string(plugin.name)} (API: #{api_id}) seems to be invalid, " <>
+              "reason #{get_validation_message(body)}"
       {:ok, %Response{status_code: status_code}} ->
         throw "Error while creating or updating Plugin: invalid response status code. " <>
               "Expected: 200, got: #{to_string(status_code)}"

@@ -84,6 +84,9 @@ defmodule Annon.Client.API do
       {:ok, %Response{status_code: status_code}} when status_code in [200, 201] ->
         Enum.map(api.plugins, &Plugin.apply_plugin(api, &1, opts))
         if status_code == 200, do: {:ok, {:updated, api}}, else: {:ok, {:created, api}}
+      {:ok, %Response{status_code: 422, body: body}} ->
+        throw "Configuration for API #{to_string(api.name)} seems to be invalid, " <>
+              "reason #{get_validation_message(body)}"
       {:ok, %Response{status_code: status_code}} ->
         throw "Error while creating or updating API: invalid response status code. " <>
               "Expected: 200, got: #{to_string(status_code)}"
