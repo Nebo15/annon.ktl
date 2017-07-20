@@ -43,7 +43,7 @@ defmodule Annon.Controller.Subcommands.API do
         do: IO.ANSI.yellow() <> "Yes" <> IO.ANSI.reset,
       else: "No"
 
-    description = if api.description != "", do: "\n\n" <> api.description, else: ""
+    description = if not is_nil(api.description) and api.description != "", do: "\n\n" <> api.description, else: ""
 
     plugins = Enum.map(api.plugins, &format_plugin/1)
 
@@ -94,6 +94,8 @@ defmodule Annon.Controller.Subcommands.API do
     """
   end
 
+  defp colorify_text(nil, _),
+    do: ""
   defp colorify_text(text, true),
     do: IO.ANSI.green() <> text <> IO.ANSI.reset
   defp colorify_text(text, false),
