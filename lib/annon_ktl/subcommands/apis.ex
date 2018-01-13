@@ -138,7 +138,7 @@ defmodule Annon.Controller.Subcommands.APIs do
 
       upstream_uri =
         if not is_nil(proxy),
-          do: ~s|#{proxy.settings["scheme"]}://#{proxy.settings["host"]}:#{proxy.settings["port"]}#{proxy.settings["path"]} | <>
+          do: ~s|#{proxy.settings["upstream"]["scheme"]}://#{proxy.settings["upstream"]["host"]}:#{proxy.settings["upstream"]["port"]}#{proxy.settings["upstream"]["path"]} | <>
               ~s|(#{pretty_boolean(proxy.settings["strip_api_path"])})|,
         else: "Not loaded"
 
