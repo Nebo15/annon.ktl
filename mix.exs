@@ -1,7 +1,7 @@
 defmodule Annon.Controller.Mixfile do
   use Mix.Project
 
-  @version "0.2.8"
+  @version "0.3.0"
 
   def project do
     [app: :annon_ktl,
