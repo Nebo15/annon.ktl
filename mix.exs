@@ -71,6 +71,6 @@ defmodule Annon.Controller.Mixfile do
      maintainers: ["Nebo #15"],
      licenses: ["LISENSE.md"],
      links: %{github: "https://github.com/Nebo15/annon_ktl"},
-     files: ~w(lib bin LICENSE.md mix.exs README.md)]
+     files: ~w(lib LICENSE.md mix.exs README.md)]
   end
 end
