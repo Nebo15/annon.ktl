@@ -15,6 +15,12 @@ defmodule Annon.Controller.Subcommands.Config do
     context set-current    Set current context.
     context get-current    Get current context.
     help                   Prints help about config command.
+
+  Examples:
+
+    annonktl config context apply localhost http://localhost:4001/
+    annonktl config context set-current localhost
+
   """
   alias Annon.Controller.Context
 
